@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospi-Admin | Hospital Administration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .main-content {
+            transition: margin-left 0.3s ease-in-out;
+        }
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Toast Notification */
+        .toast {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-white w-64 absolute md:relative inset-y-0 left-0 transform md:transform-none z-30 shadow-lg">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h1 class="text-2xl font-bold text-blue-600">Hospi-Admin</h1>
+                <button id="close-sidebar-btn" class="md:hidden text-gray-600 hover:text-gray-800">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <nav class="mt-4">
+                <a href="#dashboard" class="nav-link flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-l-4 border-blue-500">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#appointments" class="nav-link flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="calendar-days" class="w-5 h-5 mr-3"></i>
+                    Appointments
+                </a>
+                <a href="#patients" class="nav-link flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                    Patients
+                </a>
+                <a href="#departments" class="nav-link flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="siren" class="w-5 h-5 mr-3"></i>
+                    Departments
+                </a>
+                <a href="#consultations" class="nav-link flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="video" class="w-5 h-5 mr-3"></i>
+                    Online Consultations
+                </a>
+                <a href="#billing" class="nav-link flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="receipt" class="w-5 h-5 mr-3"></i>
+                    Billing & Payments
+                </a>
+                <a href="#insurance" class="nav-link flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="shield-check" class="w-5 h-5 mr-3"></i>
+                    Insurance Claims
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div id="main-content" class="main-content flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center p-4 bg-white border-b">
+                <div class="flex items-center">
+                    <button id="open-sidebar-btn" class="md:hidden mr-4 text-gray-600 hover:text-gray-800">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h2 id="page-title" class="text-xl font-semibold">Dashboard</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=AD" alt="Admin" class="w-8 h-8 rounded-full mr-2">
+                        <div>
+                            <span class="font-medium">Admin User</span>
+                            <p class="text-sm text-gray-500">administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-f0f2f5 p-6">
+                
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Patients</p>
+                                <p id="total-patients-stat" class="text-3xl font-bold">3</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i data-lucide="users" class="text-blue-500"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Today's Appointments</p>
+                                <p id="today-appointments-stat" class="text-3xl font-bold">3</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i data-lucide="calendar" class="text-green-500"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Revenue</p>
+                                <p class="text-3xl font-bold">₹47,12,740</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i data-lucide="indian-rupee" class="text-yellow-500"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Doctors on Duty</p>
+                                <p class="text-3xl font-bold">18</p>
+                            </div>
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i data-lucide="stethoscope" class="text-red-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="font-semibold mb-4">Upcoming Appointments</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3">Patient Name</th>
+                                        <th class="px-6 py-3">Doctor</th>
+                                        <th class="px-6 py-3">Department</th>
+                                        <th class="px-6 py-3">Time</th>
+                                        <th class="px-6 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-appointments-table">
+                                    <!-- Appointments will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Appointments Section -->
+                <section id="appointments" class="page-content hidden">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-xl">Manage Appointments</h3>
+                            <button id="book-appointment-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+                                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Book Appointment
+                            </button>
+                        </div>
+                        <p class="text-gray-600">A full calendar view or a detailed table of all appointments (past, present, and future) would be displayed here, with options for cancellation and rescheduling.</p>
+                    </div>
+                </section>
+
+                <!-- Patients Section -->
+                <section id="patients" class="page-content hidden">
+                     <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-xl">Patient Directory</h3>
+                            <button id="register-patient-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+                                <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>Register New Patient
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3">Full Name</th>
+                                        <th class="px-6 py-3">Gender</th>
+                                        <th class="px-6 py-3">Phone Number</th>
+                                        <th class="px-6 py-3">Insurance Provider</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patients-table">
+                                    <!-- Patient data will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Departments Section -->
+                <section id="departments" class="page-content hidden">
+                    <div id="departments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Department cards will be dynamically inserted here -->
+                        <div id="add-department-card" class="bg-white p-5 rounded-lg shadow border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-50">
+                            <div class="text-center text-gray-500">
+                                <i data-lucide="plus-circle" class="mx-auto h-8 w-8"></i>
+                                <span class="mt-2 block text-sm font-medium">Add New Department</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Online Consultations Section -->
+                <section id="consultations" class="page-content hidden">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="font-semibold text-xl mb-4">Online Consultations</h3>
+                        <p class="text-gray-600">A list of scheduled and active online video consultations would appear here. Administrators could launch new sessions or monitor existing ones.</p>
+                    </div>
+                </section>
+
+                <!-- Billing Section -->
+                <section id="billing" class="page-content hidden">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-xl">Billing & Payments</h3>
+                             <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center">
+                                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Generate Invoice
+                            </button>
+                        </div>
+                       <p class="text-gray-600">This section will feature a comprehensive table of all financial transactions. It will allow for creating invoices, processing payments, and viewing payment histories for each patient.</p>
+                    </div>
+                </section>
+                
+                <!-- Insurance Section -->
+                <section id="insurance" class="page-content hidden">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                         <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-xl">Insurance Claims</h3>
+                             <button id="file-claim-btn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 flex items-center">
+                                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>File New Claim
+                            </button>
+                        </div>
+                         <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3">Patient Name</th>
+                                        <th class="px-6 py-3">Provider</th>
+                                        <th class="px-6 py-3">Policy Number</th>
+                                        <th class="px-6 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="claims-table">
+                                    <!-- Claims data will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Patient Registration Modal -->
+    <div id="patient-modal" class="fixed inset-0 z-40 items-center justify-center hidden">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:max-w-xl sm:w-full z-50">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h4 class="text-lg font-semibold">Register New Patient</h4>
+                <button class="close-modal-btn text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="patient-form" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input name="fullName" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        <input name="dob" type="date" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Gender</label>
+                        <select name="gender" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input name="phone" type="tel" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                     <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Address</label>
+                        <input name="address" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Insurance Provider</label>
+                        <input name="insuranceProvider" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Blue Cross">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Policy Number</label>
+                        <input name="policyNumber" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="flex justify-end items-center p-4 border-t mt-4 -mx-6 -mb-6">
+                     <button type="button" class="close-modal-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
+                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Register Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Booking Modal -->
+     <div id="appointment-modal" class="fixed inset-0 z-40 items-center justify-center hidden">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:max-w-xl sm:w-full z-50">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h4 class="text-lg font-semibold">Book New Appointment</h4>
+                <button class="close-modal-btn text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="appointment-form" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Patient Name</label>
+                        <input name="patientName" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Search for existing patient..." required>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Department</label>
+                        <select name="department" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            <option>Cardiology</option>
+                            <option>Neurology</option>
+                            <option>Orthopedics</option>
+                            <option>Pediatrics</option>
+                            <option>Dermatology</option>
+                            <option>Oncology</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Doctor</label>
+                        <select name="doctor" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            <option>Dr. Emily Carter</option>
+                            <option>Dr. Ben Adams</option>
+                            <option>Dr. Sarah Lee</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Appointment Time</label>
+                        <input name="time" type="time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    <div class="md:col-span-2">
+                         <label class="block text-sm font-medium text-gray-700">Reason for Visit</label>
+                         <textarea name="reason" rows="3" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end items-center p-4 border-t mt-4 -mx-6 -mb-6">
+                    <button type="button" class="close-modal-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Book Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Department Modal -->
+    <div id="department-modal" class="fixed inset-0 z-40 items-center justify-center hidden">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:max-w-md sm:w-full z-50">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h4 class="text-lg font-semibold">Add New Department</h4>
+                <button class="close-modal-btn text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="department-form" class="p-6">
+                <div class="space-y-4">
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Department Name</label>
+                        <input name="name" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Department Head</label>
+                        <input name="head" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Number of Doctors</label>
+                        <input name="doctors" type="number" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Room Numbers</label>
+                        <input name="rooms" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 701-705" required>
+                    </div>
+                </div>
+                <div class="flex justify-end items-center p-4 border-t mt-4 -mx-6 -mb-6">
+                     <button type="button" class="close-modal-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
+                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Claim Modal -->
+    <div id="claim-modal" class="fixed inset-0 z-40 items-center justify-center hidden">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:max-w-md sm:w-full z-50">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h4 class="text-lg font-semibold">File New Insurance Claim</h4>
+                <button class="close-modal-btn text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="claim-form" class="p-6">
+                <div class="space-y-4">
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Patient Name</label>
+                        <input name="patientName" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Insurance Provider</label>
+                        <input name="provider" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Policy Number</label>
+                        <input name="policy" type="text" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                </div>
+                <div class="flex justify-end items-center p-4 border-t mt-4 -mx-6 -mb-6">
+                     <button type="button" class="close-modal-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
+                     <button type="submit" class="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">File Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-5 right-5 bg-green-500 text-white py-3 px-6 rounded-lg shadow-lg">
+        <p id="toast-message"></p>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Data Store (In-memory database) ---
+            let patients = [
+                { fullName: 'John Doe', gender: 'Male', phone: '123-456-7890', insuranceProvider: 'Blue Cross' },
+                { fullName: 'Jane Smith', gender: 'Female', phone: '098-765-4321', insuranceProvider: 'Aetna' },
+                { fullName: 'Mike Johnson', gender: 'Male', phone: '555-555-5555', insuranceProvider: 'United' },
+            ];
+            
+            let appointments = [
+                { patientName: 'John Doe', doctor: 'Dr. Emily Carter', department: 'Cardiology', time: '10:30 AM', status: 'Confirmed' },
+                { patientName: 'Jane Smith', doctor: 'Dr. Ben Adams', department: 'Neurology', time: '11:00 AM', status: 'Confirmed' },
+                { patientName: 'Mike Johnson', doctor: 'Dr. Sarah Lee', department: 'Orthopedics', time: '11:15 AM', status: 'Pending' },
+            ];
+
+            let departments = [
+                 { name: 'Cardiology', head: 'Dr. Emily Carter', doctors: 5, rooms: '101-105' },
+                 { name: 'Neurology', head: 'Dr. Ben Adams', doctors: 4, rooms: '201-204' },
+                 { name: 'Orthopedics', head: 'Dr. Sarah Lee', doctors: 6, rooms: '301-306' },
+                 { name: 'Pediatrics', head: 'Dr. Anil Kumar', doctors: 5, rooms: '401-405' },
+                 { name: 'Dermatology', head: 'Dr. Priya Sharma', doctors: 3, rooms: '501-503' },
+                 { name: 'Oncology', head: 'Dr. Rajesh Singh', doctors: 4, rooms: '601-604' },
+            ];
+            
+            let claims = [];
+
+            // --- Selectors ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pageContents = document.querySelectorAll('.page-content');
+            const pageTitle = document.getElementById('page-title');
+            const sidebar = document.getElementById('sidebar');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            
+            // --- UI Render Functions ---
+            const renderPatients = () => {
+                const tableBody = document.getElementById('patients-table');
+                tableBody.innerHTML = '';
+                patients.forEach(p => {
+                    const row = `
+                        <tr class="bg-white border-b">
+                            <td class="px-6 py-4 font-medium">${p.fullName}</td>
+                            <td class="px-6 py-4">${p.gender}</td>
+                            <td class="px-6 py-4">${p.phone}</td>
+                            <td class="px-6 py-4">${p.insuranceProvider}</td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            };
+            
+            const renderAppointments = () => {
+                const tableBody = document.getElementById('dashboard-appointments-table');
+                tableBody.innerHTML = '';
+                const statusColors = {
+                    'Confirmed': 'bg-green-100 text-green-800',
+                    'Pending': 'bg-yellow-100 text-yellow-800',
+                };
+                appointments.forEach(a => {
+                    const statusClass = statusColors[a.status] || 'bg-gray-100 text-gray-800';
+                    const row = `
+                        <tr class="bg-white border-b">
+                            <td class="px-6 py-4 font-medium">${a.patientName}</td>
+                            <td class="px-6 py-4">${a.doctor}</td>
+                            <td class="px-6 py-4">${a.department}</td>
+                            <td class="px-6 py-4">${a.time}</td>
+                            <td class="px-6 py-4"><span class="text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full ${statusClass}">${a.status}</span></td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            };
+
+            const renderDepartments = () => {
+                const grid = document.getElementById('departments-grid');
+                grid.innerHTML = ''; // Clear existing
+                departments.forEach(d => {
+                    const card = `
+                        <div class="bg-white p-5 rounded-lg shadow">
+                            <h4 class="font-bold text-lg">${d.name}</h4>
+                            <p class="text-sm text-gray-500 mt-1">Head: ${d.head}</p>
+                            <p class="text-sm text-gray-500">Doctors: ${d.doctors}</p>
+                            <p class="text-sm text-gray-500">Rooms: ${d.rooms}</p>
+                        </div>`;
+                    grid.innerHTML += card;
+                });
+                // Re-add the "add" card
+                grid.innerHTML += `
+                    <div id="add-department-card" class="bg-white p-5 rounded-lg shadow border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-50">
+                        <div class="text-center text-gray-500">
+                            <i data-lucide="plus-circle" class="mx-auto h-8 w-8"></i>
+                            <span class="mt-2 block text-sm font-medium">Add New Department</span>
+                        </div>
+                    </div>`;
+                // Re-attach event listener to the new card
+                document.getElementById('add-department-card').addEventListener('click', () => openModal(departmentModal));
+            };
+            
+             const renderClaims = () => {
+                const tableBody = document.getElementById('claims-table');
+                tableBody.innerHTML = '';
+                claims.forEach(c => {
+                    const row = `
+                        <tr class="bg-white border-b">
+                            <td class="px-6 py-4 font-medium">${c.patientName}</td>
+                            <td class="px-6 py-4">${c.provider}</td>
+                            <td class="px-6 py-4">${c.policy}</td>
+                            <td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Submitted</span></td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            };
+
+            const updateDashboardStats = () => {
+                document.getElementById('total-patients-stat').textContent = patients.length;
+                document.getElementById('today-appointments-stat').textContent = appointments.length;
+            };
+
+            // --- Toast Notification ---
+            const showToast = (message) => {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toast-message');
+                toastMessage.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            };
+
+            // --- Navigation Logic ---
+            const showPage = (hash) => {
+                const targetId = hash.substring(1);
+                pageContents.forEach(page => page.classList.add('hidden'));
+                const targetPage = document.getElementById(targetId);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                    pageTitle.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1);
+                }
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('bg-blue-50', 'border-l-4', 'border-blue-500', 'text-gray-700');
+                        link.classList.remove('text-gray-600');
+                    } else {
+                        link.classList.remove('bg-blue-50', 'border-l-4', 'border-blue-500', 'text-gray-700');
+                        link.classList.add('text-gray-600');
+                    }
+                });
+                if (window.innerWidth < 768) sidebar.classList.add('sidebar-hidden');
+            };
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.hash = link.getAttribute('href');
+                });
+            });
+
+            window.addEventListener('hashchange', () => showPage(window.location.hash || '#dashboard'));
+            
+            // --- Sidebar Toggle Logic ---
+            openSidebarBtn.addEventListener('click', () => sidebar.classList.remove('sidebar-hidden'));
+            closeSidebarBtn.addEventListener('click', () => sidebar.classList.add('sidebar-hidden'));
+            
+            // --- Modal Logic ---
+            const modals = {
+                patient: document.getElementById('patient-modal'),
+                appointment: document.getElementById('appointment-modal'),
+                department: document.getElementById('department-modal'),
+                claim: document.getElementById('claim-modal')
+            };
+            
+            const openModal = (modal) => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+            };
+
+            const closeModal = (modal) => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (!Object.values(modals).some(m => m.classList.contains('flex'))) {
+                    document.body.classList.remove('overflow-hidden');
+                }
+            };
+            
+            document.querySelectorAll('.close-modal-btn, .modal-backdrop').forEach(btn => {
+                btn.addEventListener('click', () => Object.values(modals).forEach(closeModal));
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape") Object.values(modals).forEach(closeModal);
+            });
+            
+            // Open Modal Buttons
+            document.getElementById('register-patient-btn').addEventListener('click', () => openModal(modals.patient));
+            document.getElementById('book-appointment-btn').addEventListener('click', () => openModal(modals.appointment));
+            document.getElementById('file-claim-btn').addEventListener('click', () => openModal(modals.claim));
+            // Add listener is attached in renderDepartments
+
+            // --- Form Submission Logic ---
+            document.getElementById('patient-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const newPatient = {
+                    fullName: formData.get('fullName'),
+                    gender: formData.get('gender'),
+                    phone: formData.get('phone'),
+                    insuranceProvider: formData.get('insuranceProvider'),
+                };
+                patients.push(newPatient);
+                renderPatients();
+                updateDashboardStats();
+                closeModal(modals.patient);
+                this.reset();
+                showToast('Patient registered successfully!');
+            });
+            
+            document.getElementById('appointment-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const newAppointment = {
+                    patientName: formData.get('patientName'),
+                    doctor: formData.get('doctor'),
+                    department: formData.get('department'),
+                    time: formData.get('time'),
+                    status: 'Pending',
+                };
+                appointments.push(newAppointment);
+                renderAppointments();
+                updateDashboardStats();
+                closeModal(modals.appointment);
+                this.reset();
+                showToast('Appointment booked successfully!');
+            });
+
+            document.getElementById('department-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const newDepartment = {
+                    name: formData.get('name'),
+                    head: formData.get('head'),
+                    doctors: formData.get('doctors'),
+                    rooms: formData.get('rooms'),
+                };
+                departments.push(newDepartment);
+                renderDepartments();
+                lucide.createIcons(); // Re-render icons
+                closeModal(modals.department);
+                this.reset();
+                showToast('Department added successfully!');
+            });
+            
+            document.getElementById('claim-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const newClaim = {
+                    patientName: formData.get('patientName'),
+                    provider: formData.get('provider'),
+                    policy: formData.get('policy'),
+                };
+                claims.push(newClaim);
+                renderClaims();
+                closeModal(modals.claim);
+                this.reset();
+                showToast('Claim filed successfully!');
+            });
+
+            // --- Initial Render ---
+            const initializeApp = () => {
+                showPage(window.location.hash || '#dashboard');
+                renderPatients();
+                renderAppointments();
+                renderDepartments();
+                renderClaims();
+                lucide.createIcons();
+                updateDashboardStats();
+            };
+            
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
+
