@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo {
+            text-align: center;
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            margin: 5px 20px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid #2a5298;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: #2a5298;
+            margin-right: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        /* Forms */
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(42,82,152,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table-header h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr:nth-child(even) {
+            background: #fdfdfd;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            .search-box {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-hospital"></i> HMS</h2>
+                <p>Hospital Management System</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="patients">
+                        <i class="fas fa-user-injured"></i>
+                        Patient Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="doctors">
+                        <i class="fas fa-user-md"></i>
+                        Doctor Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="appointments">
+                        <i class="fas fa-calendar-check"></i>
+                        Appointments
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Header -->
+            <div class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Dashboard Section -->
+            <section class="section active" id="dashboard">
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-user-injured"></i>
+                            </div>
+                            <div class="card-title">Total Patients</div>
+                        </div>
+                        <div class="card-value" id="totalPatients">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="card-title">Total Doctors</div>
+                        </div>
+                        <div class="card-value" id="totalDoctors">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="card-title">Today's Appointments</div>
+                        </div>
+                        <div class="card-value" id="todayAppointments">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patient Management Section -->
+            <section class="section" id="patients">
+                <!-- Add Patient Form -->
+                <div class="form-container">
+                    <h3>Add New Patient</h3>
+                    <form id="patientForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="patientName">Full Name *</label>
+                                <input type="text" class="form-control" id="patientName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patientAge">Age *</label>
+                                <input type="number" class="form-control" id="patientAge" min="1" max="120" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patientGender">Gender *</label>
+                                <select class="form-control" id="patientGender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="patientContact">Contact Number *</label>
+                                <input type="tel" class="form-control" id="patientContact" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patientAddress">Address</label>
+                                <input type="text" class="form-control" id="patientAddress">
+                            </div>
+                            <div class="form-group">
+                                <label for="patientCondition">Medical Condition</label>
+                                <input type="text" class="form-control" id="patientCondition">
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">Add Patient</button>
+                            <button type="reset" class="btn btn-secondary">Reset</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Patient List -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Patient List</h3>
+                        <div class="search-box">
+                            <input type="text" class="form-control search-input" id="patientSearch" placeholder="Search patients...">
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Contact</th>
+                                <th>Medical Condition</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Doctor Management Section -->
+            <section class="section" id="doctors">
+                <!-- Add Doctor Form -->
+                <div class="form-container">
+                    <h3>Add New Doctor</h3>
+                    <form id="doctorForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="doctorName">Full Name *</label>
+                                <input type="text" class="form-control" id="doctorName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="doctorDepartment">Department *</label>
+                                <select class="form-control" id="doctorDepartment" required>
+                                    <option value="">Select Department</option>
+                                    <option value="Cardiology">Cardiology</option>
+                                    <option value="Neurology">Neurology</option>
+                                    <option value="Orthopedics">Orthopedics</option>
+                                    <option value="Pediatrics">Pediatrics</option>
+                                    <option value="General Medicine">General Medicine</option>
+                                    <option value="Surgery">Surgery</option>
+                                    <option value="Dermatology">Dermatology</option>
+                                    <option value="Psychiatry">Psychiatry</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="doctorContact">Contact Number *</label>
+                                <input type="tel" class="form-control" id="doctorContact" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="doctorAvailability">Availability *</label>
+                                <input type="text" class="form-control" id="doctorAvailability" placeholder="e.g., Mon-Fri 9AM-5PM" required>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">Add Doctor</button>
+                            <button type="reset" class="btn btn-secondary">Reset</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Doctor List -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Doctor List</h3>
+                        <div class="search-box">
+                            <input type="text" class="form-control search-input" id="doctorSearch" placeholder="Search doctors...">
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Contact</th>
+                                <th>Availability</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Appointment Management Section -->
+            <section class="section" id="appointments">
+                <!-- Book Appointment Form -->
+                <div class="form-container">
+                    <h3>Book New Appointment</h3>
+                    <form id="appointmentForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="appointmentPatient">Select Patient *</label>
+                                <select class="form-control" id="appointmentPatient" required>
+                                    <option value="">Choose Patient</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="appointmentDoctor">Select Doctor *</label>
+                                <select class="form-control" id="appointmentDoctor" required>
+                                    <option value="">Choose Doctor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="appointmentDate">Date *</label>
+                                <input type="date" class="form-control" id="appointmentDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="appointmentTime">Time *</label>
+                                <input type="time" class="form-control" id="appointmentTime" required>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">Book Appointment</button>
+                            <button type="reset" class="btn btn-secondary">Reset</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Appointment List -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Appointment List</h3>
+                        <div class="search-box">
+                            <input type="text" class="form-control search-input" id="appointmentSearch" placeholder="Search appointments...">
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Doctor Name</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let patients = [];
+        let doctors = [];
+        let appointments = [];
+        let patientIdCounter = 1;
+        let doctorIdCounter = 1;
+        let appointmentIdCounter = 1;
+
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Initialize navigation
+            setupNavigation();
+            
+            // Initialize forms
+            setupPatientForm();
+            setupDoctorForm();
+            setupAppointmentForm();
+            
+            // Initialize search functionality
+            setupSearch();
+            
+            // Add sample data
+            addSampleData();
+            
+            // Initial display
+            displayAllData();
+            
+            // Set minimum date for appointments
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDate').min = today;
+            
+            console.log('App initialized successfully');
+        }
+
+        function setupNavigation() {
+            const sidebar = document.getElementById('sidebar');
+            const mobileToggle = document.getElementById('mobileToggle');
+            const pageTitle = document.getElementById('pageTitle');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.section');
+
+            // Mobile toggle
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-visible');
+            });
+
+            // Navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetSection = link.getAttribute('data-section');
+                    
+                    // Update active nav link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    // Show target section
+                    sections.forEach(section => section.classList.remove('active'));
+                    document.getElementById(targetSection).classList.add('active');
+                    
+                    // Update page title
+                    pageTitle.textContent = link.textContent.trim();
+                    
+                    // Hide mobile sidebar
+                    sidebar.classList.remove('mobile-visible');
+                });
+            });
+        }
+
+        function setupPatientForm() {
+            const patientForm = document.getElementById('patientForm');
+            patientForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Adding new patient...');
+                
+                const patient = {
+                    id: patientIdCounter++,
+                    name: document.getElementById('patientName').value.trim(),
+                    age: parseInt(document.getElementById('patientAge').value),
+                    gender: document.getElementById('patientGender').value,
+                    contact: document.getElementById('patientContact').value.trim(),
+                    address: document.getElementById('patientAddress').value.trim(),
+                    condition: document.getElementById('patientCondition').value.trim() || 'N/A'
+                };
+                
+                patients.push(patient);
+                console.log('Patient added:', patient);
+                console.log('Total patients:', patients.length);
+                
+                displayPatients();
+                updateDashboard();
+                updateAppointmentDropdowns();
+                patientForm.reset();
+                
+                showSuccessMessage('Patient added successfully!');
+            });
+        }
+
+        function setupDoctorForm() {
+            const doctorForm = document.getElementById('doctorForm');
+            doctorForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Adding new doctor...');
+                
+                const doctor = {
+                    id: doctorIdCounter++,
+                    name: document.getElementById('doctorName').value.trim(),
+                    department: document.getElementById('doctorDepartment').value,
+                    contact: document.getElementById('doctorContact').value.trim(),
+                    availability: document.getElementById('doctorAvailability').value.trim()
+                };
+                
+                doctors.push(doctor);
+                console.log('Doctor added:', doctor);
+                console.log('Total doctors:', doctors.length);
+                
+                displayDoctors();
+                updateDashboard();
+                updateAppointmentDropdowns();
+                doctorForm.reset();
+                
+                showSuccessMessage('Doctor added successfully!');
+            });
+        }
+
+        function setupAppointmentForm() {
+            const appointmentForm = document.getElementById('appointmentForm');
+            appointmentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Booking new appointment...');
+                
+                const patientId = parseInt(document.getElementById('appointmentPatient').value);
+                const doctorId = parseInt(document.getElementById('appointmentDoctor').value);
+                const patient = patients.find(p => p.id === patientId);
+                const doctor = doctors.find(d => d.id === doctorId);
+                
+                if (!patient || !doctor) {
+                    alert('Please select both patient and doctor');
+                    return;
+                }
+                
+                const appointment = {
+                    id: appointmentIdCounter++,
+                    patientId: patientId,
+                    doctorId: doctorId,
+                    patientName: patient.name,
+                    doctorName: doctor.name,
+                    date: document.getElementById('appointmentDate').value,
+                    time: document.getElementById('appointmentTime').value,
+                    status: 'Scheduled'
+                };
+                
+                appointments.push(appointment);
+                console.log('Appointment added:', appointment);
+                console.log('Total appointments:', appointments.length);
+                
+                displayAppointments();
+                updateDashboard();
+                appointmentForm.reset();
+                
+                showSuccessMessage('Appointment booked successfully!');
+            });
+        }
+
+        function setupSearch() {
+            // Patient search
+            const patientSearch = document.getElementById('patientSearch');
+            patientSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = patients.filter(patient => 
+                    patient.name.toLowerCase().includes(searchTerm) ||
+                    patient.contact.includes(searchTerm) ||
+                    (patient.condition && patient.condition.toLowerCase().includes(searchTerm))
+                );
+                displayPatients(filtered);
+            });
+
+            // Doctor search
+            const doctorSearch = document.getElementById('doctorSearch');
+            doctorSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = doctors.filter(doctor => 
+                    doctor.name.toLowerCase().includes(searchTerm) ||
+                    doctor.department.toLowerCase().includes(searchTerm) ||
+                    doctor.contact.includes(searchTerm)
+                );
+                displayDoctors(filtered);
+            });
+
+            // Appointment search
+            const appointmentSearch = document.getElementById('appointmentSearch');
+            appointmentSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = appointments.filter(appointment => 
+                    appointment.patientName.toLowerCase().includes(searchTerm) ||
+                    appointment.doctorName.toLowerCase().includes(searchTerm) ||
+                    appointment.date.includes(searchTerm)
+                );
+                displayAppointments(filtered);
+            });
+        }
+
+        function displayPatients(filteredPatients = patients) {
+            console.log('Displaying patients:', filteredPatients.length);
+            const patientTableBody = document.getElementById('patientTableBody');
+            patientTableBody.innerHTML = '';
+            
+            filteredPatients.forEach(patient => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>P${String(patient.id).padStart(3, '0')}</td>
+                    <td>${patient.name}</td>
+                    <td>${patient.age}</td>
+                    <td>${patient.gender}</td>
+                    <td>${patient.contact}</td>
+                    <td>${patient.condition}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deletePatient(${patient.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                patientTableBody.appendChild(row);
+            });
+        }
+
+        function displayDoctors(filteredDoctors = doctors) {
+            console.log('Displaying doctors:', filteredDoctors.length);
+            const doctorTableBody = document.getElementById('doctorTableBody');
+            doctorTableBody.innerHTML = '';
+            
+            filteredDoctors.forEach(doctor => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>D${String(doctor.id).padStart(3, '0')}</td>
+                    <td>${doctor.name}</td>
+                    <td>${doctor.department}</td>
+                    <td>${doctor.contact}</td>
+                    <td>${doctor.availability}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteDoctor(${doctor.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                doctorTableBody.appendChild(row);
+            });
+        }
+
+        function displayAppointments(filteredAppointments = appointments) {
+            console.log('Displaying appointments:', filteredAppointments.length);
+            const appointmentTableBody = document.getElementById('appointmentTableBody');
+            appointmentTableBody.innerHTML = '';
+            
+            filteredAppointments.forEach(appointment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>A${String(appointment.id).padStart(3, '0')}</td>
+                    <td>${appointment.patientName}</td>
+                    <td>${appointment.doctorName}</td>
+                    <td>${appointment.date}</td>
+                    <td>${appointment.time}</td>
+                    <td><span style="padding: 5px 10px; background: #d4edda; color: #155724; border-radius: 4px; font-size: 0.9rem;">${appointment.status}</span></td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteAppointment(${appointment.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                appointmentTableBody.appendChild(row);
+            });
+        }
+
+        function displayAllData() {
+            displayPatients();
+            displayDoctors();
+            displayAppointments();
+            updateDashboard();
+            updateAppointmentDropdowns();
+        }
+
+        // Delete functions
+        function deletePatient(patientId) {
+            console.log('Deleting patient:', patientId);
+            if (confirm('Are you sure you want to delete this patient record?')) {
+                patients = patients.filter(patient => patient.id !== patientId);
+                displayPatients();
+                updateDashboard();
+                updateAppointmentDropdowns();
+                showSuccessMessage('Patient deleted successfully!');
+            }
+        }
+
+        function deleteDoctor(doctorId) {
+            console.log('Deleting doctor:', doctorId);
+            if (confirm('Are you sure you want to delete this doctor record?')) {
+                doctors = doctors.filter(doctor => doctor.id !== doctorId);
+                displayDoctors();
+                updateDashboard();
+                updateAppointmentDropdowns();
+                showSuccessMessage('Doctor deleted successfully!');
+            }
+        }
+
+        function deleteAppointment(appointmentId) {
+            console.log('Deleting appointment:', appointmentId);
+            if (confirm('Are you sure you want to delete this appointment?')) {
+                appointments = appointments.filter(appointment => appointment.id !== appointmentId);
+                displayAppointments();
+                updateDashboard();
+                showSuccessMessage('Appointment deleted successfully!');
+            }
+        }
+
+        function updateAppointmentDropdowns() {
+            console.log('Updating appointment dropdowns...');
+            const appointmentPatient = document.getElementById('appointmentPatient');
+            const appointmentDoctor = document.getElementById('appointmentDoctor');
+            
+            // Update patient dropdown
+            appointmentPatient.innerHTML = '<option value="">Choose Patient</option>';
+            patients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = `${patient.name} (Age: ${patient.age})`;
+                appointmentPatient.appendChild(option);
+            });
+            
+            // Update doctor dropdown
+            appointmentDoctor.innerHTML = '<option value="">Choose Doctor</option>';
+            doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                option.textContent = `${doctor.name} - ${doctor.department}`;
+                appointmentDoctor.appendChild(option);
+            });
+        }
+
+        function updateDashboard() {
+            console.log('Updating dashboard...');
+            document.getElementById('totalPatients').textContent = patients.length;
+            document.getElementById('totalDoctors').textContent = doctors.length;
+            
+            // Count today's appointments
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = appointments.filter(apt => apt.date === today).length;
+            document.getElementById('todayAppointments').textContent = todayCount;
+        }
+
+        function showSuccessMessage(message) {
+            console.log('Success:', message);
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            
+            const activeSection = document.querySelector('.section.active');
+            if (activeSection) {
+                activeSection.insertBefore(successDiv, activeSection.firstChild);
+                
+                setTimeout(() => {
+                    successDiv.remove();
+                }, 3000);
+            }
+        }
+
+        function addSampleData() {
+            console.log('Adding sample data...');
+            
+            // Sample patients
+            const samplePatients = [
+                {
+                    id: patientIdCounter++,
+                    name: "John Smith",
+                    age: 35,
+                    gender: "Male",
+                    contact: "+1-555-0123",
+                    address: "123 Main St, City",
+                    condition: "Hypertension"
+                },
+                {
+                    id: patientIdCounter++,
+                    name: "Sarah Johnson",
+                    age: 28,
+                    gender: "Female",
+                    contact: "+1-555-0124",
+                    address: "456 Oak Ave, City",
+                    condition: "Diabetes"
+                }
+            ];
+
+            // Sample doctors
+            const sampleDoctors = [
+                {
+                    id: doctorIdCounter++,
+                    name: "Dr. Michael Brown",
+                    department: "Cardiology",
+                    contact: "+1-555-0125",
+                    availability: "Mon-Fri 9AM-5PM"
+                },
+                {
+                    id: doctorIdCounter++,
+                    name: "Dr. Emily Davis",
+                    department: "General Medicine",
+                    contact: "+1-555-0126",
+                    availability: "Mon-Sat 8AM-6PM"
+                }
+            ];
+
+            patients.push(...samplePatients);
+            doctors.push(...sampleDoctors);
+            
+            console.log('Sample data added - Patients:', patients.length, 'Doctors:', doctors.length);
+        }
+    </script>
+</body>
+</html>
